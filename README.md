@@ -14,10 +14,11 @@ velkými písmeny a po stisku tlačítka s vlajkou ho přečte nahlas v cílové
 
 ## Ovládání
 
+- **Emoji / české slovo** – ťuknutím se slovo přečte nahlas v češtině 🇨🇿.
 - **Tlačítka jazyků** – přečtou slovo nahlas.
 - **◀ / ▶** – předchozí / další slovo.
 - **🎲** – náhodné slovo.
-- Na PC fungují i šipky (◀ ▶), mezerník (náhodně) a klávesy 1–3 (jazyky).
+- Na PC fungují i šipky (◀ ▶), mezerník (náhodně), klávesa 0 (čeština) a klávesy 1–3 (jazyky).
 
 ## Přidání slovíček
 
