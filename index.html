@@ -314,23 +314,24 @@ if (synth) {
 
 function pickVoice(def) {
   if (!voices.length) return null;
-  const wanted = [def.lang, ...def.fallbacks];
-  for (const w of wanted) {
-    const exact = voices.find((v) => v.lang && v.lang.toLowerCase() === w.toLowerCase());
-    if (exact) return exact;
-  }
-  // jakýkoli hlas se shodným prefixem jazyka (es, en, de…)
-  const prefix = def.key;
-  return voices.find((v) => v.lang && v.lang.toLowerCase().startsWith(prefix)) || null;
+  const wanted = [def.lang.toLowerCase(), ...def.fallbacks.map((s) => s.toLowerCase())];
+  const cand = voices.filter((v) => {
+    const l = (v.lang || "").toLowerCase();
+    return wanted.includes(l) || l.startsWith(def.key);
+  });
+  if (!cand.length) return null;
+  // 1) preferuj offline (local) hlasy — síťové hlasy (Google na Androidu) jsou pomalé
+  //    a při výpadku sítě mlčí; 2) pak podle pořadí preferovaných jazyků
+  cand.sort((a, b) => {
+    if (!!a.localService !== !!b.localService) return a.localService ? -1 : 1;
+    const ra = wanted.indexOf((a.lang || "").toLowerCase());
+    const rb = wanted.indexOf((b.lang || "").toLowerCase());
+    return (ra < 0 ? 99 : ra) - (rb < 0 ? 99 : rb);
+  });
+  return cand[0];
 }
 
-let ttsWarned = false;
-function speak(def, text, btn) {
-  if (!synth) {
-    if (!ttsWarned) { toast("Tvůj prohlížeč neumí číst nahlas 🙊"); ttsWarned = true; }
-    return;
-  }
-  synth.cancel();
+function buildUtterance(def, text, btn) {
   const u = new SpeechSynthesisUtterance(text);
   const v = pickVoice(def);
   if (v) u.voice = v;
@@ -344,7 +345,25 @@ function speak(def, text, btn) {
     u.onend = clear;
     u.onerror = clear;
   }
-  synth.speak(u);
+  return u;
+}
+
+let ttsWarned = false;
+function speak(def, text, btn) {
+  if (!synth) {
+    if (!ttsWarned) { toast("Tvůj prohlížeč neumí číst nahlas 🙊"); ttsWarned = true; }
+    return;
+  }
+  if (!voices.length) refreshVoices();      // hlasy nemusí být po prvním ťuknutí načtené
+  if (synth.paused) { try { synth.resume(); } catch (e) {} }  // iOS: odpauzovat
+
+  if (synth.speaking || synth.pending) {
+    // už něco mluví → zrušit a chvíli počkat, jinak Android nový projev zahodí
+    synth.cancel();
+    setTimeout(() => synth.speak(buildUtterance(def, text, btn)), 130);
+  } else {
+    synth.speak(buildUtterance(def, text, btn));
+  }
 }
 
 /* ---------- vykreslení ---------- */
