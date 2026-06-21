@@ -2,7 +2,7 @@
 
 Jednoduchá, hravá webová hra pro děti na výslovnost slovíček. Zobrazí české slovo
 velkými písmeny a po stisku tlačítka s vlajkou ho přečte nahlas v cílovém jazyce
-(angličtina 🇬🇧, němčina 🇩🇪, španělština 🇪🇸).
+(angličtina 🇺🇸, němčina 🇩🇪, španělština 🇪🇸).
 
 **Živá verze:** https://mlutonsky.github.io/wordlang/
 
